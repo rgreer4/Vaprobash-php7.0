@@ -29,7 +29,7 @@ if [[ $HHVM == "true" ]]; then
 
     sudo service hhvm restart
 else
-    sudo add-apt-repository -y ppa:ondrej/php-7.0
+    sudo add-apt-repository -y ppa:ondrej/php
     sudo apt-key update
     sudo apt-get update
     
