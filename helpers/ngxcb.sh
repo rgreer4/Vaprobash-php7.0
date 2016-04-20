@@ -134,6 +134,7 @@ cat <<EOF
 
         location / {
             try_files \$uri \$uri/ /app.php?\$query_string /index.php?\$query_string;
+            autoindex on;
         }
 
         location = /favicon.ico { log_not_found off; access_log off; }
@@ -169,6 +170,7 @@ cat <<EOF
 
         location / {
             try_files \$uri \$uri/ /app.php?\$query_string /index.php?\$query_string;
+            autoindex on;
         }
 
         location = /favicon.ico { log_not_found off; access_log off; }
