@@ -49,6 +49,32 @@ else
     sudo sed -i "s/listen\.owner.*/listen.owner = vagrant/" /etc/php/7.0/fpm/pool.d/www.conf
     sudo sed -i "s/listen\.group.*/listen.group = vagrant/" /etc/php/7.0/fpm/pool.d/www.conf
     sudo sed -i "s/listen\.mode.*/listen.mode = 0666/" /etc/php/7.0/fpm/pool.d/www.conf
+    
+    sudo mv /usr/lib/php/20131226/xdebug.so /usr/lib/php/20131226/xdebug.so.old
+	
+	# xdebug Config
+    cat > $(find /etc/php/7.0 -name xdebug.ini) << EOF
+zend_extension=$(find /usr/lib/php -name xdebug.so)
+xdebug.remote_enable = 1
+xdebug.remote_connect_back = 1
+xdebug.remote_port = 9000
+xdebug.scream=0
+xdebug.cli_color=1
+xdebug.show_local_vars=1
+
+; var_dump display
+xdebug.var_display_max_depth = 5
+xdebug.var_display_max_children = 256
+xdebug.var_display_max_data = 1024
+EOF
+
+	# PHP Error Reporting Config
+    sudo sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.0/fpm/php.ini
+    sudo sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.0/fpm/php.ini
+
+    # PHP Date Timezone
+    sudo sed -i "s/;date.timezone =.*/date.timezone = ${PHP_TIMEZONE/\//\\/}/" /etc/php/7.0/fpm/php.ini
+    sudo sed -i "s/;date.timezone =.*/date.timezone = ${PHP_TIMEZONE/\//\\/}/" /etc/php/7.0/cli/php.ini
 
     sudo service php7.0-fpm restart
 fi
