@@ -81,3 +81,5 @@ shopt -u nocasematch
 
 # Enable cachefilesd
 echo "RUN=yes" > /etc/default/cachefilesd
+
+echo "PS1=\"\[\e[30;1m\]\[\016\]-\[\017\][\[\e[34;1m\]\u@\h\[\e[30;1m\]]-[\[\e[34;1m\]\j\[\e[30;1m\]]-[\[\[\e[32;1m\]\w\[\e[30;1m\]]\[\e[30;1m\]\[\016\]\[\017\]# \[\e[0m\]\"" >> /home/vagrant/.bashrc
