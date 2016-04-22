@@ -21,27 +21,27 @@ hostname        = "vaprobash.dev"
 #   10.0.0.1    - 10.255.255.254
 #   172.16.0.1  - 172.31.255.254
 #   192.168.0.1 - 192.168.255.254
-server_ip             = "192.168.22.10"
+server_ip             = "192.168.22.22"
 server_cpus           = "1"   # Cores
-server_memory         = "384" # MB
-server_swap           = "768" # Options: false | int (MB) - Guideline: Between one or two times the server_memory
+server_memory         = "1024" # MB
+server_swap           = "1024" # Options: false | int (MB) - Guideline: Between one or two times the server_memory
 
 # UTC        for Universal Coordinated Time
 # EST        for Eastern Standard Time
 # US/Central for American Central
 # US/Eastern for American Eastern
-server_timezone  = "UTC"
+server_timezone  = "US/Central"
 
 # Database Configuration
 mysql_root_password   = "root"   # We'll assume user "root"
 mysql_version         = "5.5"    # Options: 5.5 | 5.6
-mysql_enable_remote   = "false"  # remote access enabled when true
+mysql_enable_remote   = "true"  # remote access enabled when true
 pgsql_root_password   = "root"   # We'll assume user "root"
 mongo_version         = "2.6"    # Options: 2.6 | 3.0
-mongo_enable_remote   = "false"  # remote access enabled when true
+mongo_enable_remote   = "true"  # remote access enabled when true
 
 # Languages and Packages
-php_timezone          = "UTC"    # http://php.net/manual/en/timezones.php
+php_timezone          = "America/Chicago"    # http://php.net/manual/en/timezones.php
 php_version           = "7.0"    # Options: 7.0
 ruby_version          = "latest" # Choose what ruby version should be installed (will also be the default version)
 ruby_gems             = [        # List any Ruby Gems that you want to install
@@ -72,11 +72,14 @@ laravel_root_folder   = "/vagrant/laravel" # Where to install Laravel. Will `com
 laravel_version       = "latest-stable" # If you need a specific version of Laravel, set it here
 symfony_root_folder   = "/vagrant/symfony" # Where to install Symfony.
 
+database_backup_folder = "/vagrant/sqlbackup"
+server_script_folder = "/vagrant/vagrant"
+
 nodejs_version        = "latest"   # By default "latest" will equal the latest stable version
 nodejs_packages       = [          # List any global NodeJS packages that you want to install
   #"grunt-cli",
-  #"gulp",
-  #"bower",
+  "gulp",
+  "bower",
   #"yo",
 ]
 
@@ -112,7 +115,8 @@ Vagrant.configure("2") do |config|
     config.vm.network :private_network, :ip => "0.0.0.0", :auto_network => true
   else
     config.vm.network :private_network, ip: server_ip
-    config.vm.network :forwarded_port, guest: 80, host: 8000
+    config.vm.network :forwarded_port, guest: 80, host: 80
+    config.vm.network :forwarded_port, guest: 3306, host: 3306
   end
 
   # Enable agent forwarding over SSH connections
@@ -121,8 +125,9 @@ Vagrant.configure("2") do |config|
   # Use NFS for the shared folder
   config.vm.synced_folder ".", "/vagrant",
     id: "core",
-    :nfs => true,
-    :mount_options => ['nolock,vers=3,udp,noatime,actimeo=2,fsc']
+    #:nfs => true,
+    #:mount_options => ['nolock,vers=3,udp,noatime,actimeo=2,fsc']
+	  :mount_options => ['dmode=777','fmode=777']
 
   # Replicate local .gitconfig file if it exists
   if File.file?(File.expand_path("~/.gitconfig"))
@@ -148,6 +153,8 @@ Vagrant.configure("2") do |config|
     # Prevent VMs running on Ubuntu to lose internet connection
     # vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
     # vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+    
+    vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate//vagrant", "1"]
 
   end
 
@@ -217,7 +224,7 @@ Vagrant.configure("2") do |config|
   # config.vm.provision "shell", path: "#{github_url}/scripts/apache.sh", args: [server_ip, public_folder, hostname, github_url]
 
   # Provision Nginx Base
-  # config.vm.provision "shell", path: "#{github_url}/scripts/nginx.sh", args: [server_ip, public_folder, hostname, github_url]
+  config.vm.provision "shell", path: "#{github_url}/scripts/nginx.sh", args: [server_ip, public_folder, hostname, github_url]
 
 
   ####
@@ -225,7 +232,7 @@ Vagrant.configure("2") do |config|
   ##########
 
   # Provision MySQL
-  # config.vm.provision "shell", path: "#{github_url}/scripts/mysql.sh", args: [mysql_root_password, mysql_version, mysql_enable_remote]
+  config.vm.provision "shell", path: "#{github_url}/scripts/mysql.sh", args: [mysql_root_password, mysql_version, mysql_enable_remote]
 
   # Provision PostgreSQL
   # config.vm.provision "shell", path: "#{github_url}/scripts/pgsql.sh", args: pgsql_root_password
@@ -313,7 +320,7 @@ Vagrant.configure("2") do |config|
   ##########
 
   # Install Nodejs
-  # config.vm.provision "shell", path: "#{github_url}/scripts/nodejs.sh", privileged: false, args: nodejs_packages.unshift(nodejs_version, github_url)
+  config.vm.provision "shell", path: "#{github_url}/scripts/nodejs.sh", privileged: false, args: nodejs_packages.unshift(nodejs_version, github_url)
 
   # Install Ruby Version Manager (RVM)
   # config.vm.provision "shell", path: "#{github_url}/scripts/rvm.sh", privileged: false, args: ruby_gems.unshift(ruby_version)
@@ -327,7 +334,7 @@ Vagrant.configure("2") do |config|
 
   # Provision Composer
   # You may pass a github auth token as the first argument
-  # config.vm.provision "shell", path: "#{github_url}/scripts/composer.sh", privileged: false, args: [github_pat, composer_packages.join(" ")]
+  config.vm.provision "shell", path: "#{github_url}/scripts/composer.sh", privileged: false, args: [github_pat, composer_packages.join(" ")]
 
   # Provision Laravel
   # config.vm.provision "shell", path: "#{github_url}/scripts/laravel.sh", privileged: false, args: [server_ip, laravel_root_folder, public_folder, laravel_version]
@@ -336,7 +343,7 @@ Vagrant.configure("2") do |config|
   # config.vm.provision "shell", path: "#{github_url}/scripts/symfony.sh", privileged: false, args: [server_ip, symfony_root_folder, public_folder]
 
   # Install Screen
-  # config.vm.provision "shell", path: "#{github_url}/scripts/screen.sh"
+  config.vm.provision "shell", path: "#{github_url}/scripts/screen.sh"
 
   # Install Mailcatcher
   # config.vm.provision "shell", path: "#{github_url}/scripts/mailcatcher.sh"
@@ -351,10 +358,24 @@ Vagrant.configure("2") do |config|
   # config.vm.provision "shell", path: "#{github_url}/scripts/android.sh"
 
   ####
+  # Database backup and restore
+  ##########
+  
+  # Install automysqlbackup 
+  config.vm.provision "shell", path: "#{github_url}/scripts/automysqlbackup.sh", args: [database_backup_folder, mysql_root_password]
+  
+  # Restore last backup 
+  config.vm.provision "shell", path: "#{github_url}/scripts/automysqlbackup-restore.sh", args: [database_backup_folder, mysql_root_password]
+  
+  
+  ####
   # Local Scripts
   # Any local scripts you may want to run post-provisioning.
   # Add these to the same directory as the Vagrantfile.
   ##########
   # config.vm.provision "shell", path: "./local-script.sh"
+  
+  # Shared server folders script
+  config.vm.provision "shell", path: "#{github_url}/scripts/server-script.sh", args: [server_script_folder]
 
 end
