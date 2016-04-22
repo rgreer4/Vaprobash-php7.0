@@ -68,6 +68,8 @@ xdebug.var_display_max_children = 256
 xdebug.var_display_max_data = 1024
 EOF
 
+    sudo rm /etc/php/7.0/cli/conf.d/20-xdebug.ini
+    
 	# PHP Error Reporting Config
     sudo sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.0/fpm/php.ini
     sudo sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.0/fpm/php.ini
