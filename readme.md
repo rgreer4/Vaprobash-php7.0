@@ -1,3 +1,5 @@
+NOTE: Modified to work with PHP 7 and add several additional custom actions, auto database reloading, etc.
+
 # Vaprobash
 
 **Va**&#x200B;grant **Pro**&#x200B;visioning **Bash** Scripts
