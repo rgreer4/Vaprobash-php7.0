@@ -61,6 +61,6 @@ fi
 # Install (optional) Global Node Packages
 if [[ ! -z $NODE_PACKAGES ]]; then
     echo ">>> Start installing Global Node Packages"
-    npm config set bin-links false
     npm install -g ${NODE_PACKAGES[@]}
+    npm config set bin-links false
 fi
