@@ -377,5 +377,6 @@ Vagrant.configure("2") do |config|
   
   # Shared server folders script
   config.vm.provision "shell", path: "#{github_url}/scripts/server-script.sh", args: [server_script_folder]
+  config.vm.provision "shell", path: "#{github_url}/scripts/server-script-nopriv.sh", privileged: false, args: [server_script_folder]
 
 end
